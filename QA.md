@@ -1,42 +1,39 @@
-# QA card — `<fixture-repo-name>`
-
-Each fixture overrides this file with concrete values.
+# QA card — ftm-atr-no-policies
 
 ## Description
 
-(One sentence — what FTM Overview state does this fixture demonstrate?)
+EFD + PR Gate + ATR on, Policies off. High flake rate (60%) so some pipelines slip past ATR retries.
 
 ## Audit cells exercised
 
-(Reference rows from `2026-04-30-ftm-overview-copy-audit.md`. Example: `§3.4 #4`, `§5.2 #1/#2`.)
+- §3.4 #5 next-action — "Next: Mitigation. Enable Flaky Test Policies."
+- §6.2 #5 mitigation verdict — "Auto Test Retries couldn't catch {N} flaky failures this month."
+- §6.2 #6a/#6b — when flake rate happens to be low for a window
+- §6.6 *some* state — after manually quarantining one targeted test
 
 ## Required Datadog toggles
 
-| Toggle | State | Where to set |
+| Toggle | State | Notes |
 | --- | --- | --- |
-| EFD | on / off | Test Optimization → Repo settings → Early Flake Detection |
-| PR Gate | covering / not | Source Code → PR Gates → rule type `no_new_flaky_tests` |
-| ATR | on / off | Test Optimization → Repo settings → Auto Test Retries |
-| Policies | none / some / full | Test Optimization → Repo settings → Flaky Test Policies |
+| EFD | **on** | Repo settings |
+| PR Gate | **on** | Source Code rule scoping this repo |
+| ATR | **on** | Repo settings; max retries 2 |
+| Policies | **none** | Default policy off |
 
 ## Special setup steps
 
-(Anything beyond toggles. E.g., install GitHub App, manually quarantine X, create notification rule for team Y.)
+To exercise §6.6 *some* (partial Policies state): after T+14, open Datadog → Test Optimization → Tests Explorer, search for `test_targeted_alpha` scoped to this repo, set Status: Quarantined. Reversal: set back to Active.
 
 ## Expected verdicts (after warm-up)
 
-- §3.4 next-action: `<the exact copy this fixture should render>`
-- §5.2 prevention verdict: `<...>`
-- §6.2 mitigation verdict: `<...>`
-- §7.2 remediation verdict: `<...>`
+- §3.4 next-action: "Next: Mitigation. Enable Flaky Test Policies."
+- §6.2 mitigation verdict: §6.2 #5 "Auto Test Retries couldn't catch {N} flaky failures this month."
 
 ## Readiness
 
-Ready for QA at: T+_ days after first push.
+T+14.
 
 ## How to refresh
-
-If CI has gone silent (>60d inactive), kick a run:
 
 ```bash
 git commit --allow-empty -m "rerun" && git push

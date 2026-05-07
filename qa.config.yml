@@ -1,19 +1,20 @@
-# Per-fixture QA configuration. Fixtures override this file.
-# DO NOT change in the template; change only in spawned fixtures.
-
-description: "TEMPLATE — overridden by each fixture."
-instrumentation: native            # native | junit
-flake_rate: 0.0                    # probability each pooled test fails per run
-num_flaky_tests: 0
+description: "ATR on but Policies off. High flake rate so ATR can't catch everything. Drives §3.4 #5 and §6.2 #5/#6."
+instrumentation: native
+flake_rate: 0.60
+num_flaky_tests: 30
 num_stable_tests: 50
 include_failing_tests: false
 codeowners: true
-qa_target_branches: []
+qa_target_branches:
+    - "§3.4 #5 next-action — Next: Mitigation. Enable Flaky Test Policies."
+    - "§6.2 #5 — ATR couldn't catch N flaky failures."
+    - "§6.2 #6a/#6b — ATR active variants."
+    - "§6.6 some (after manual policy on one test)"
 required_toggles:
-    efd: off
-    pr_gate: off
-    atr: off
+    efd: on
+    pr_gate: on
+    atr: on
     policies: none
-    bits_proactive_prs: off
-warmup: "n/a — template has no warmup"
+    bits_proactive_prs: n/a
+warmup: "*/30 min for 14 days, then 0 */6 * * *. Ready T+14."
 datadog_org: "<fill-in-org-url>"
