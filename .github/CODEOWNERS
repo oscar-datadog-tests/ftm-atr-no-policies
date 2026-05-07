@@ -1,0 +1,9 @@
+# FTM QA fixture CODEOWNERS.
+# Each test file is owned by a distinct fake team so the FTM Overview's
+# Code Owners breakdown card (§7.6) shows 4 distinct owners.
+# In ftm-no-codeowners this file is deleted to exercise the empty state.
+
+tests/test_stable.py     @oscar-datadog-tests/flaky-team-a
+tests/test_flaky_pool.py @oscar-datadog-tests/flaky-team-b
+tests/test_targeted.py   @oscar-datadog-tests/flaky-team-c
+tests/test_failing.py    @oscar-datadog-tests/flaky-team-d

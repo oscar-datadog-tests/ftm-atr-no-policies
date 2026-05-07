@@ -1,0 +1,19 @@
+# Per-fixture QA configuration. Fixtures override this file.
+# DO NOT change in the template; change only in spawned fixtures.
+
+description: "TEMPLATE — overridden by each fixture."
+instrumentation: native            # native | junit
+flake_rate: 0.0                    # probability each pooled test fails per run
+num_flaky_tests: 0
+num_stable_tests: 50
+include_failing_tests: false
+codeowners: true
+qa_target_branches: []
+required_toggles:
+    efd: off
+    pr_gate: off
+    atr: off
+    policies: none
+    bits_proactive_prs: off
+warmup: "n/a — template has no warmup"
+datadog_org: "<fill-in-org-url>"

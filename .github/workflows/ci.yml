@@ -1,0 +1,63 @@
+name: ci
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+    workflow_dispatch:
+    schedule:
+        # Default warm-up cadence; bump to */10 or throttle to 0 */6 per fixture.
+        - cron: "*/30 * * * *"
+
+permissions:
+    contents: read
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        env:
+            FLAKE_RATE: ${{ vars.FLAKE_RATE || '0' }}
+            NUM_FLAKY_TESTS: ${{ vars.NUM_FLAKY_TESTS || '0' }}
+            NUM_STABLE_TESTS: ${{ vars.NUM_STABLE_TESTS || '0' }}
+            FAILURE_MODE: ${{ vars.FAILURE_MODE || 'false' }}
+            INSTRUMENTATION: ${{ vars.INSTRUMENTATION || 'native' }}
+            DD_API_KEY: ${{ secrets.DD_API_KEY }}
+            DD_SITE: ${{ vars.DD_SITE || 'datadoghq.com' }}
+            DD_ENV: ci
+            DD_SERVICE: ${{ github.event.repository.name }}
+            DD_GITHUB_REPO_URL: ${{ github.event.repository.html_url }}
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-python@v5
+              with:
+                  python-version: "3.11"
+
+            - name: Install dependencies
+              run: |
+                  python -m pip install --upgrade pip
+                  pip install -e .
+
+            - name: Run pytest (native instrumentation)
+              if: env.INSTRUMENTATION == 'native'
+              run: ddtrace-run pytest --ddtrace -v
+              env:
+                  DD_CIVISIBILITY_ENABLED: "1"
+                  DD_CIVISIBILITY_AGENTLESS_ENABLED: "1"
+
+            - name: Run pytest (JUnit XML upload)
+              if: env.INSTRUMENTATION == 'junit'
+              run: pytest --junitxml=junit.xml -v
+              continue-on-error: true
+
+            - name: Install datadog-ci
+              if: env.INSTRUMENTATION == 'junit'
+              run: npm install -g @datadog/datadog-ci
+
+            - name: Upload JUnit results
+              if: env.INSTRUMENTATION == 'junit'
+              run: |
+                  datadog-ci junit upload \
+                      --service "$DD_SERVICE" \
+                      --tags "git.repository.url:$DD_GITHUB_REPO_URL" \
+                      junit.xml
